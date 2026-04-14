@@ -119,6 +119,7 @@ def preprocessing(image):
 
     return image
 
+
 # Batching dataset
 def batching(img_path, steer_angle, batch_size=32, training=True):
     while True:
@@ -139,5 +140,54 @@ def batching(img_path, steer_angle, batch_size=32, training=True):
                 batch_steer.append(angle)
 
             yield np.array(batch_img), np.array(batch_steer)
+
+
+# MODEL
+def self_driving_model():
+
+    model = Sequential()
+
+    model.add(Conv2D(24, (5,5), strides=(2,2), activation='relu', input_shape=(66,200,3)))
+    model.add(Conv2D(36, (5,5), strides=(2,2), activation='relu'))
+    model.add(Conv2D(48, (5,5), strides=(2,2), activation='relu'))
+    model.add(Conv2D(64, (3,3), activation='relu'))
+    model.add(Conv2D(64, (3,3), activation='relu'))
+
+    model.add(Flatten())
+
+    model.add(Dense(100, activation='relu'))
+    model.add(Dense(50, activation='relu'))
+    model.add(Dense(10, activation='relu'))
+    model.add(Dense(1))  
+
+    model.compile(optimizer='adam', loss='mse')
+
+    return self_driving_model
+
+model = self_driving_model()
+
+train_batch = batching(X_train, y_train, training=True)
+validate_batch  = batching(X_val, y_val, training=False)
+
+H = model.fit(
+    train_batch,
+    steps_per_epoch = len(X_train)//32,
+    validation_data = validate_batch,
+    validation_steps = len(X_val)//32,
+    epochs=5
+)
+
+# EVALUATE
+plt.plot(H.history['loss'])
+plt.plot(H.history['val_loss'])
+
+plt.title('Model Loss')
+plt.ylabel('Loss')
+plt.xlabel('Epoch')
+
+plt.legend(['Training Loss', 'Validation Loss'])
+plt.show()
+
+model.save("self_driving_model.h5")
 
 
