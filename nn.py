@@ -8,12 +8,13 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
+import os 
 from sklearn.model_selection import train_test_split
 from keras.models import Sequential
 from keras.layers import Conv2D, Flatten, Dense
 
 # DATA
-df = pd.read_csv("driving_log.csv", header=None)
+df = pd.read_csv("C:\drivingsim_recs\driving_log.csv", header=None)
 
 # Column headers for 'steering', 'throttle', 'brake', and 'speed' are missing in csv file
 df.columns = ["center", "left", "right", "steering", "throttle", "brake", "speed"]
@@ -42,14 +43,17 @@ plt.title("After balancing")
 
 plt.show()
 
-# Data augmentation
 X = balanced_df["center"]
 y = balanced_df["steering"]
 
 X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2)
 
-def data(image_path):
-    return cv2.imread(image_path)
+
+# Data augmentation
+def load(img_path):
+    filename = os.path.basename(img_path)
+    path = os.path.join("../drivingsim_recs/IMG", filename)
+    return cv2.imread(path)
 
 def flip(img, steering):
     img = cv2.flip(img, 1)
@@ -104,4 +108,16 @@ def augmenting(image, steering):
         image = rotate(image)
 
     return image, steering
+
+
+# Data pre-processing
+def preprocessing(image):
+    h, w, _ = image.shape
+    image = image[int(h * 0.4):int(h * 0.85), :, :]
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2YUV)
+    image = cv2.GaussianBlur(image, (3, 3), 0)
+    image = cv2.resize(image, (200, 66))
+    image = image / 255
+
+    return image
 
