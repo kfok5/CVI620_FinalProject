@@ -67,13 +67,11 @@ def adjust_bright(img):
 
 def zoom(img):
     h, w = img.shape[:2]
-    factor = 1 + 0.2 * np.random.rand()
-
-    new_h, new_w = int(h/factor), int(w/factor)
-    y1 = np.random.randint(0, h - new_h)
-    x1 = np.random.randint(0, w - new_w)
-
-    cropped = img[y1:y1+new_h, x1:x1+new_w]
+    zm = 1 + 0.2 * np.random.rand()
+    hz, wz = int(h/zm), int(w/zm)
+    y1 = np.random.randint(0, h - hz)
+    x1 = np.random.randint(0, w - wz)
+    cropped = img[y1:y1+hz, x1:x1+wz]
     return cv2.resize(cropped, (w, h))
 
 def pan(img):
@@ -120,4 +118,26 @@ def preprocessing(image):
     image = image / 255
 
     return image
+
+# Batching dataset
+def batching(img_path, steer_angle, batch_size=32, training=True):
+    while True:
+        for i in range(0, len(img_path), batch_size):
+
+            batch_img = []
+            batch_steer = []
+
+            for x in range(i, min(i + batch_size, len(img_path))):
+                img = load(img_path.iloc[x])
+                angle = steer_angle.iloc[x]
+
+                if training:
+                    img, angle = augmenting(img, angle)
+
+                img = preprocessing(img)
+                batch_img.append(img)
+                batch_steer.append(angle)
+
+            yield np.array(batch_img), np.array(batch_steer)
+
 
