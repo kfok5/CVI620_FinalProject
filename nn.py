@@ -25,10 +25,10 @@ print(df.columns)
 
 steering = df["steering"]
 
-turning = df[abs(df["steering"]) > 0.05]
-straight = df[abs(df["steering"]) <= 0.05]
+turning = df[abs(df["steering"]) > 0.1]
+straight = df[abs(df["steering"]) <= 0.1]
 
-straight = straight.sample(n=len(turning))
+straight = straight.sample(frac=0.2)
 
 balanced_df = pd.concat([turning, straight])
 
@@ -174,7 +174,7 @@ H = model.fit(
     steps_per_epoch = len(X_train)//32,
     validation_data = validate_batch,
     validation_steps = len(X_val)//32,
-    epochs=3
+    epochs=10
 )
 
 # EVALUATE
