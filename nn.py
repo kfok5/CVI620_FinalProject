@@ -15,7 +15,7 @@ from keras.models import Sequential
 from keras.layers import Conv2D, Flatten, Dense
 
 # DATA
-df = pd.read_csv("C:\drivingsim_recs\driving_log.csv", header=None)
+df = pd.read_csv("driving_log.csv", header=None)
 
 # Column headers for 'steering', 'throttle', 'brake', and 'speed' are missing in csv file
 df.columns = ["center", "left", "right", "steering", "throttle", "brake", "speed"]
@@ -51,13 +51,10 @@ X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2)
 
 
 # Data augmentation
-# def load(img_path):
-#     filename = os.path.basename(img_path)
-#     path = os.path.join("../drivingsim_recs/IMG", filename)
-#     return cv2.imread(path)
-
 def load(img_path):
-    return cv2.imread(img_path)
+    filename = os.path.basename(img_path)
+    path = os.path.join("IMG", filename)
+    return cv2.imread(path)
 
 def flip(img, steering):
     img = cv2.flip(img, 1)
