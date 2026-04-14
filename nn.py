@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 import os 
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error
+from keras import models
 from keras.models import Sequential
 from keras.layers import Conv2D, Flatten, Dense
 
@@ -51,10 +51,13 @@ X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2)
 
 
 # Data augmentation
+# def load(img_path):
+#     filename = os.path.basename(img_path)
+#     path = os.path.join("../drivingsim_recs/IMG", filename)
+#     return cv2.imread(path)
+
 def load(img_path):
-    filename = os.path.basename(img_path)
-    path = os.path.join("../drivingsim_recs/IMG", filename)
-    return cv2.imread(path)
+    return cv2.imread(img_path)
 
 def flip(img, steering):
     img = cv2.flip(img, 1)
@@ -122,7 +125,7 @@ def preprocessing(image):
 
 
 # Batching dataset
-def batching(img_path, steer_angle, batch_size=32, training=True):
+def data_generator(img_path, steer_angle, batch_size=32, training=True):
     while True:
         for i in range(0, len(img_path), batch_size):
 
@@ -166,8 +169,8 @@ def self_driving_model():
 
 model = self_driving_model()
 
-train_batch = batching(X_train, y_train, training=True)
-validate_batch  = batching(X_val, y_val, training=False)
+train_batch = data_generator(X_train, y_train, training=True)
+validate_batch  = data_generator(X_val, y_val, training=False)
 
 H = model.fit(
     train_batch,
