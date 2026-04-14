@@ -2,7 +2,7 @@
 # $ conda create --name <env> --file <this file>
 # platform: win-64
 _tflow_select=2.3.0=gpu
-absl-py=0.14.0=pyhd8ed1ab_0
+absl-py=0.14.0=pyhd8ed1ab_
 aiohttp=3.7.4.post0=py38h294d835_0
 astor=0.8.1=pyh9f0ad1d_0
 astunparse=1.6.3=pyhd8ed1ab_0
