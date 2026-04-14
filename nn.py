@@ -38,3 +38,5 @@ plt.hist(balanced_df["steering"], bins=25)
 plt.title("After balancing")
 
 plt.show()
+
+# Augmenting the data
