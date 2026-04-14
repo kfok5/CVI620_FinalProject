@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 import os 
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
 from keras.models import Sequential
 from keras.layers import Conv2D, Flatten, Dense
 
@@ -141,7 +142,6 @@ def batching(img_path, steer_angle, batch_size=32, training=True):
 
             yield np.array(batch_img), np.array(batch_steer)
 
-
 # MODEL
 def self_driving_model():
 
@@ -160,9 +160,9 @@ def self_driving_model():
     model.add(Dense(10, activation='relu'))
     model.add(Dense(1))  
 
-    model.compile(optimizer='adam', loss='mse')
+    model.compile(optimizer='adam', loss='mean_squared_error')
 
-    return self_driving_model
+    return model
 
 model = self_driving_model()
 
@@ -174,7 +174,7 @@ H = model.fit(
     steps_per_epoch = len(X_train)//32,
     validation_data = validate_batch,
     validation_steps = len(X_val)//32,
-    epochs=5
+    epochs=3
 )
 
 # EVALUATE
@@ -189,5 +189,3 @@ plt.legend(['Training Loss', 'Validation Loss'])
 plt.show()
 
 model.save("self_driving_model.h5")
-
-
