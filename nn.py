@@ -7,6 +7,10 @@ import pandas as pd
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import tensorflow as tf
+from sklearn.model_selection import train_test_split
+from keras.models import Sequential
+from keras.layers import Conv2D, Flatten, Dense
 
 # DATA
 df = pd.read_csv("driving_log.csv", header=None)
@@ -19,7 +23,6 @@ print(df.columns)
 
 steering = df["steering"]
 
-# MODEL 
 turning = df[abs(df["steering"]) > 0.05]
 straight = df[abs(df["steering"]) <= 0.05]
 
@@ -39,4 +42,66 @@ plt.title("After balancing")
 
 plt.show()
 
-# Augmenting the data
+# Data augmentation
+X = balanced_df["center"]
+y = balanced_df["steering"]
+
+X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2)
+
+def data(image_path):
+    return cv2.imread(image_path)
+
+def flip(img, steering):
+    img = cv2.flip(img, 1)
+    return img, -steering
+
+def adjust_bright(img):
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    r = 1.0 + 0.4 * (np.random.rand() - 0.5)
+    hsv[:,:,2] = hsv[:,:,2] * r
+    return cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
+
+def zoom(img):
+    h, w = img.shape[:2]
+    factor = 1 + 0.2 * np.random.rand()
+
+    new_h, new_w = int(h/factor), int(w/factor)
+    y1 = np.random.randint(0, h - new_h)
+    x1 = np.random.randint(0, w - new_w)
+
+    cropped = img[y1:y1+new_h, x1:x1+new_w]
+    return cv2.resize(cropped, (w, h))
+
+def pan(img):
+    h, w = img.shape[:2]
+    x_shift = int(0.1 * w * (np.random.rand() - 0.5))
+    y_shift = int(0.1 * h * (np.random.rand() - 0.5))
+
+    mtx = np.float32([[1, 0, x_shift], [0, 1, y_shift]])
+    return cv2.warpAffine(img, mtx, (w, h))
+
+def rotate(img):
+    h, w = img.shape[:2]
+    angle = np.random.uniform(-10, 10)
+
+    mtx = cv2.getRotationMatrix2D((w//2, h//2), angle, 1)
+    return cv2.warpAffine(img, mtx, (w, h))
+
+def augmenting(image, steering):
+    if np.random.rand() < 0.5:
+        image, steering = flip(image, steering)
+
+    if np.random.rand() < 0.5:
+        image = adjust_bright(image)
+
+    if np.random.rand() < 0.5:
+        image = zoom(image)
+
+    if np.random.rand() < 0.5:
+        image = pan(image)
+
+    if np.random.rand() < 0.5:
+        image = rotate(image)
+
+    return image, steering
+
